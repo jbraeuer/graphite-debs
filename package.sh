@@ -5,29 +5,43 @@
 # run "gem install fpm"
 #
 
+log() {
+    echo "$@"
+}
+
 clean() {
-    rm -rf whisper-0.9.9 carbon-0.9.9 graphite-web-0.9.9
+    rm -rf "$WORK"
     rm -f python*.deb
 }
 
 download() {
-    [ -e graphite-web-0.9.9.tar.gz ] || wget http://launchpad.net/graphite/0.9/0.9.9/+download/graphite-web-0.9.9.tar.gz
-    [ -e carbon-0.9.9.tar.gz ]       || wget http://launchpad.net/graphite/0.9/0.9.9/+download/carbon-0.9.9.tar.gz
-    [ -e whisper-0.9.9.tar.gz ]      || wget http://launchpad.net/graphite/0.9/0.9.9/+download/whisper-0.9.9.tar.gz
+    mkdir -p "$DOWNLOAD"
+    for prj in graphite-web carbon whisper; do
+	local file="$DOWNLOAD/$prj-$VERSION.tar.gz"
+	if [ ! -e "$file" ]; then
+	    cd "$DOWNLOAD"
+	    wget "http://launchpad.net/graphite/0.9/0.9.9/+download/$prj-$VERSION.tar.gz"
+	    cd -
+	fi
+    done
 }
 
 extract() {
-    tar -zxvf graphite-web-0.9.9.tar.gz
-    tar -zxvf carbon-0.9.9.tar.gz
-    tar -zxvf whisper-0.9.9.tar.gz
+    mkdir -p "$WORK"
+    for prj in graphite-web carbon whisper; do
+	tar -C "$WORK" -zxvf "$DOWNLOAD/$prj-$VERSION.tar.gz"
+    done
 }
 
 package() {
-    fpm -s python -t deb txamqp
-    fpm -s python -t deb -S 2.7 --depends "python" --depends "python-support" whisper-0.9.9/setup.py
-    fpm -s python -t deb -S 2.7 --depends "python" --depends "python-support" \
-	--depends "python-twisted" --depends "python2.7-whisper" carbon-0.9.9/setup.py
-    fpm -s python -t deb -S 2.7 --depends "python" --depends "python-support" \
+    cd "$WORK"
+    fakeroot fpm -s python -t deb txamqp
+    fakeroot fpm -s python -t deb -S 2.7 --depends "python" --depends "python-support" "./whisper-0.9.9/setup.py"
+    fakeroot fpm -s python -t deb -S 2.7 --depends "python" --depends "python-support" \
+	--depends "python-twisted" --depends "python2.7-whisper" \
+	--post-install "$BASE/fix-storage.sh" \
+	"./carbon-0.9.9/setup.py"
+    fakeroot fpm -s python -t deb -S 2.7 --depends "python" --depends "python-support" \
 	--depends "python2.7-whisper" \
 	--depends "python-twisted" \
 	--depends "python-cairo" \
@@ -38,16 +52,30 @@ package() {
 	--depends "python-pysqlite2" \
 	--depends "python-sqlite" \
 	--depends "libapache2-mod-python" \
-	graphite-web-0.9.9/setup.py
+	--post-install "$BASE/fix-storage.sh" \
+	"./graphite-web-0.9.9/setup.py"
 }
 
 install() {
-    sudo dpkg -i python*.deb
-    sudo apt-get -f install
+    log "********************************************************************************"
+    log "Find the .deb's here: $WORK"
+    log ""
+    log "To install:"
+    log "  sudo dpkg -i python*.deb"
+    log "  sudo apt-get -f install"
 }
+
+set -e
+
+BASE="$(readlink -f $(dirname "$0"))"
+WORK="$BASE/work"
+DOWNLOAD="$BASE/download"
+DIST="$BASE/dist"
+
+VERSION=0.9.9
 
 download
 clean
 extract
 package
-#install
+install
