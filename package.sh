@@ -17,19 +17,19 @@ clean() {
 download() {
     mkdir -p "$DOWNLOAD"
     for prj in graphite-web carbon whisper; do
-	local file="$DOWNLOAD/$prj-$VERSION.tar.gz"
-	if [ ! -e "$file" ]; then
-	    cd "$DOWNLOAD"
-	    wget "http://launchpad.net/graphite/0.9/0.9.9/+download/$prj-$VERSION.tar.gz"
-	    cd -
-	fi
+        local file="$DOWNLOAD/$prj-$VERSION.tar.gz"
+        if [ ! -e "$file" ]; then
+            cd "$DOWNLOAD"
+            wget "http://launchpad.net/graphite/0.9/0.9.9/+download/$prj-$VERSION.tar.gz"
+            cd -
+        fi
     done
 }
 
 extract() {
     mkdir -p "$WORK"
     for prj in graphite-web carbon whisper; do
-	tar -C "$WORK" -zxvf "$DOWNLOAD/$prj-$VERSION.tar.gz"
+        tar -C "$WORK" -zxvf "$DOWNLOAD/$prj-$VERSION.tar.gz"
     done
 }
 
@@ -38,22 +38,22 @@ package() {
     fakeroot fpm -s python -t deb txamqp
     fakeroot fpm -s python -t deb -S 2.7 --depends "python" --depends "python-support" "./whisper-0.9.9/setup.py"
     fakeroot fpm -s python -t deb -S 2.7 --depends "python" --depends "python-support" \
-	--depends "python-twisted" --depends "python2.7-whisper" \
-	--post-install "$BASE/fix-storage.sh" \
-	"./carbon-0.9.9/setup.py"
+        --depends "python-twisted" --depends "python2.7-whisper" \
+        --post-install "$BASE/fix-storage.sh" \
+        "./carbon-0.9.9/setup.py"
     fakeroot fpm -s python -t deb -S 2.7 --depends "python" --depends "python-support" \
-	--depends "python2.7-whisper" \
-	--depends "python-twisted" \
-	--depends "python-cairo" \
-	--depends "python-django" \
-	--depends "python-django-tagging" \
-	--depends "python-ldap" \
-	--depends "python-memcache" \
-	--depends "python-pysqlite2" \
-	--depends "python-sqlite" \
-	--depends "libapache2-mod-python" \
-	--post-install "$BASE/fix-storage.sh" \
-	"./graphite-web-0.9.9/setup.py"
+        --depends "python2.7-whisper" \
+        --depends "python-twisted" \
+        --depends "python-cairo" \
+        --depends "python-django" \
+        --depends "python-django-tagging" \
+        --depends "python-ldap" \
+        --depends "python-memcache" \
+        --depends "python-pysqlite2" \
+        --depends "python-sqlite" \
+        --depends "libapache2-mod-python" \
+        --post-install "$BASE/fix-storage.sh" \
+        "./graphite-web-0.9.9/setup.py"
 }
 
 install() {
