@@ -20,7 +20,7 @@ download() {
         local file="$DOWNLOAD/$prj-$VERSION.tar.gz"
         if [ ! -e "$file" ]; then
             cd "$DOWNLOAD"
-            wget "http://launchpad.net/graphite/0.9/0.9.9/+download/$prj-$VERSION.tar.gz"
+            wget "http://launchpad.net/graphite/0.9/$VERSION/+download/$prj-$VERSION.tar.gz"
             cd -
         fi
     done
@@ -35,13 +35,13 @@ extract() {
 
 package() {
     cd "$WORK"
-    fakeroot fpm -s python -t deb txamqp
-    fakeroot fpm -s python -t deb -S 2.7 --depends "python" --depends "python-support" "./whisper-0.9.9/setup.py"
-    fakeroot fpm -s python -t deb -S 2.7 --depends "python" --depends "python-support" \
+    fakeroot fpm1.8 -s python -t deb txamqp
+    fakeroot fpm1.8 -s python -t deb -S 2.7 --depends "python" --depends "python-support" "./whisper-$VERSION/setup.py"
+    fakeroot fpm1.8 -s python -t deb -S 2.7 --depends "python" --depends "python-support" \
         --depends "python-twisted" --depends "python2.7-whisper" \
         --post-install "$BASE/fix-storage.sh" \
-        "./carbon-0.9.9/setup.py"
-    fakeroot fpm -s python -t deb -S 2.7 --depends "python" --depends "python-support" \
+        "./carbon-$VERSION/setup.py"
+    fakeroot fpm1.8 -s python -t deb -S 2.7 --depends "python" --depends "python-support" \
         --depends "python2.7-whisper" \
         --depends "python-twisted" \
         --depends "python-cairo" \
@@ -53,7 +53,7 @@ package() {
         --depends "python-sqlite" \
         --depends "libapache2-mod-python" \
         --post-install "$BASE/fix-storage.sh" \
-        "./graphite-web-0.9.9/setup.py"
+        "./graphite-web-$VERSION/setup.py"
 }
 
 install() {
@@ -72,7 +72,7 @@ WORK="$BASE/work"
 DOWNLOAD="$BASE/download"
 DIST="$BASE/dist"
 
-VERSION=0.9.9
+VERSION=0.9.10
 
 download
 clean
