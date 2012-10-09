@@ -36,12 +36,12 @@ extract() {
 package() {
     cd "$WORK"
     fakeroot fpm1.8 -s python -t deb txamqp
-    fakeroot fpm1.8 -s python -t deb -S 2.7 --depends "python" --depends "python-support" "./whisper-$VERSION/setup.py"
-    fakeroot fpm1.8 -s python -t deb -S 2.7 --depends "python" --depends "python-support" \
+    fakeroot fpm1.8 -s python -t deb --python-package-name-prefix python2.7 --depends "python" --depends "python-support" "./whisper-$VERSION/setup.py"
+    fakeroot fpm1.8 -s python -t deb --python-package-name-prefix python2.7 --depends "python" --depends "python-support" \
         --depends "python-twisted" --depends "python2.7-whisper" \
         --post-install "$BASE/fix-storage.sh" \
         "./carbon-$VERSION/setup.py"
-    fakeroot fpm1.8 -s python -t deb -S 2.7 --depends "python" --depends "python-support" \
+    fakeroot fpm1.8 -s python -t deb --python-package-name-prefix python2.7 --depends "python" --depends "python-support" \
         --depends "python2.7-whisper" \
         --depends "python-twisted" \
         --depends "python-cairo" \
