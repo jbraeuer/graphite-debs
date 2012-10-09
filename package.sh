@@ -33,6 +33,10 @@ extract() {
     done
 }
 
+patch() {
+    find work -name storage.py -exec sed -i -e 's/except InvalidConfiguration, e/except whisper.InvalidConfiguration, e/' '{}' ';'
+}
+
 package() {
     cd "$WORK"
     fakeroot fpm1.8 -s python -t deb txamqp
@@ -77,5 +81,6 @@ VERSION=0.9.10
 download
 clean
 extract
+patch
 package
 install
